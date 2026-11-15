@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Emergency Money Request')}">
+    <title>Emergency Money Request</title>
+</head>
+<body>
+    <div class="app-wrapper">
+        <aside th:replace="~{fragments/sidebar :: sidebar('emergency-request')}"></aside>
+
+        <main class="main-content">
+            <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+            <div class="content-body">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1"><i class="bi bi-exclamation-octagon text-warning me-2"></i>Emergency Money Request</h4>
+                        <p class="text-muted small mb-0">Request urgent financial assistance from a trusted family member or contact</p>
+                    </div>
+                    <div>
+                        <a th:href="@{/emergency/received}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-inbox me-1"></i> View Received Requests
+                        </a>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <!-- Request Form -->
+                    <div class="col-lg-7">
+                        <div class="card card-banking">
+                            <div class="card-header-banking">
+                                <span><i class="bi bi-envelope-plus text-warning me-2"></i>Send Emergency Assistance Request</span>
+                                <span class="badge bg-light text-secondary border font-monospace" th:text="'Your Account: ' + ${account.accountNumber}">Account #</span>
+                            </div>
+                            <div class="card-body p-4">
+                                <form th:action="@{/emergency/request}" th:object="${requestDto}" method="post">
+                                    <div class="mb-3">
+                                        <label for="targetAccountNumber" class="form-label fw-semibold small text-secondary">Target Contact / Family Account Number *</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light"><i class="bi bi-person-badge text-muted"></i></span>
+                                            <input type="text" id="targetAccountNumber" th:field="*{targetAccountNumber}" class="form-control font-monospace" placeholder="1001XXXXXXXX" maxlength="12" pattern="[0-9]{12}" required autofocus>
+                                        </div>
+                                        <div class="text-danger small mt-1" th:if="${#fields.hasErrors('targetAccountNumber')}" th:errors="*{targetAccountNumber}"></div>
+                                        <div class="form-text small">Enter the 12-digit account number of the person you are requesting money from.</div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="amount" class="form-label fw-semibold small text-secondary">Requested Amount (₹) *</label>
+                                        <div class="input-group input-group-lg">
+                                            <span class="input-group-text bg-light text-warning fw-bold">₹</span>
+                                            <input type="number" step="0.01" min="5.00" max="25000.00" id="amount" th:field="*{amount}" class="form-control font-monospace" placeholder="0.00" required>
+                                        </div>
+                                        <div class="text-danger small mt-1" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></div>
+                                        <div class="form-text small">Min ₹5.00 • Max ₹25,000.00</div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="reason" class="form-label fw-semibold small text-secondary">Emergency Reason / Circumstances *</label>
+                                        <textarea id="reason" th:field="*{reason}" class="form-control" rows="3" placeholder="Explain your urgent medical, travel, or repair emergency..." required></textarea>
+                                        <div class="text-danger small mt-1" th:if="${#fields.hasErrors('reason')}" th:errors="*{reason}"></div>
+                                    </div>
+
+                                    <div class="alert alert-light border small text-muted mb-4">
+                                        <i class="bi bi-info-circle-fill text-primary me-1"></i>
+                                        The recipient will receive an instant in-app notification and must authorize the transfer with their ATM PIN. Requests expire automatically after 24 hours.
+                                    </div>
+
+                                    <button type="submit" class="btn btn-warning w-100 py-3 fw-semibold shadow-sm text-dark">
+                                        <i class="bi bi-send me-1"></i> Dispatch Emergency Request
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Pick from Trusted Contacts -->
+                    <div class="col-lg-5">
+                        <div class="card card-banking h-100">
+                            <div class="card-header-banking">
+                                <span><i class="bi bi-people text-info me-2"></i>Select from Trusted Contacts</span>
+                            </div>
+                            <div class="card-body p-3">
+                                <div th:if="${#lists.isEmpty(contacts)}" class="text-center text-muted py-4 small">
+                                    <i class="bi bi-person-x fs-2 d-block mb-1"></i>No trusted contacts added yet.
+                                    <div class="mt-2"><a th:href="@{/contacts}" class="btn btn-sm btn-outline-primary">Add Contact</a></div>
+                                </div>
+                                <div class="list-group list-group-flush" th:unless="${#lists.isEmpty(contacts)}">
+                                    <button type="button" th:each="c : ${contacts}"
+                                            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-3 rounded mb-2 border"
+                                            th:onclick="'document.getElementById(\'targetAccountNumber\').value = \'' + ${c.contactAccount.accountNumber} + '\''">
+                                        <div>
+                                            <div class="fw-bold text-dark" th:text="${c.nickname}">Jane Smith</div>
+                                            <div class="font-monospace text-muted small" th:text="${c.contactAccount.accountNumber}">1001XXXXXXXX</div>
+                                        </div>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary">Select</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sent Requests Table -->
+                <div class="card card-banking">
+                    <div class="card-header-banking">
+                        <span><i class="bi bi-clock-history me-2 text-primary"></i>My Sent Emergency Requests</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-banking">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Recipient Account</th>
+                                    <th>Amount</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Decision / Note</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${#lists.isEmpty(sentRequests)}">
+                                    <td colspan="7" class="text-center text-muted py-4">No sent emergency requests found.</td>
+                                </tr>
+                                <tr th:each="req : ${sentRequests}">
+                                    <td class="font-monospace fw-bold small text-primary" th:text="${req.requestCode}">EMG-01</td>
+                                    <td class="font-monospace small" th:text="${req.targetAccount.accountNumber}">1001XXXXXXXX</td>
+                                    <td class="fw-bold text-dark font-monospace" th:text="'₹' + ${#numbers.formatDecimal(req.amount, 1, 'COMMA', 2, 'POINT')}">₹0.00</td>
+                                    <td class="small text-truncate" style="max-width: 200px;" th:text="${req.reason}">Medical</td>
+                                    <td>
+                                        <span th:if="${req.status.name() == 'PENDING'}" class="badge bg-warning text-dark">PENDING</span>
+                                        <span th:if="${req.status.name() == 'APPROVED'}" class="badge bg-success">APPROVED</span>
+                                        <span th:if="${req.status.name() == 'REJECTED'}" class="badge bg-danger">DECLINED</span>
+                                        <span th:if="${req.status.name() == 'EXPIRED'}" class="badge bg-secondary">EXPIRED</span>
+                                    </td>
+                                    <td class="small text-muted" th:text="${#temporals.format(req.createdAt, 'yyyy-MM-dd HH:mm')}">2026-11-12</td>
+                                    <td class="small text-muted" th:text="${req.decisionNote != null ? req.decisionNote : '-'}">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

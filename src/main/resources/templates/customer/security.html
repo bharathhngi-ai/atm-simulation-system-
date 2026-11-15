@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Security Settings & Instant Freeze')}">
+    <title>Security Settings</title>
+</head>
+<body>
+    <div class="app-wrapper">
+        <aside th:replace="~{fragments/sidebar :: sidebar('security')}"></aside>
+
+        <main class="main-content">
+            <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+            <div class="content-body">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <div class="mb-4">
+                    <h4 class="fw-bold text-dark mb-1"><i class="bi bi-shield-check text-primary me-2"></i>Security Center &amp; Instant Account Freeze</h4>
+                    <p class="text-muted small mb-0">Control ATM card lock, account freeze, and monitor real-time fraud alerts</p>
+                </div>
+
+                <!-- Account Status Card -->
+                <div class="card card-banking mb-4" th:classappend="${account.frozen ? 'border-danger' : 'border-success'}">
+                    <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle p-3 d-flex align-items-center justify-content-center"
+                                 th:classappend="${account.frozen ? 'bg-danger bg-opacity-10 text-danger' : 'bg-success bg-opacity-10 text-success'}"
+                                 style="width: 60px; height: 60px;">
+                                <i class="fs-2" th:classappend="${account.frozen ? 'bi bi-snow2' : 'bi bi-shield-fill-check'}"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-1" th:if="${account.active}">Your Account is Active &amp; Protected</h5>
+                                <h5 class="fw-bold text-danger mb-1" th:if="${account.frozen}">Your Account is Currently Frozen</h5>
+                                <p class="text-muted small mb-0" th:if="${account.active}">
+                                    All ATM withdrawals, deposits, and transfers are operating normally.
+                                </p>
+                                <p class="text-danger small mb-0" th:if="${account.frozen}" th:text="'Reason: ' + (${account.frozenReason != null ? account.frozenReason : 'Locked by account holder.'})">
+                                    Outgoing operations blocked.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <!-- Freeze Trigger -->
+                            <button th:if="${account.active}" type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#freezeModal">
+                                <i class="bi bi-snow2 me-1"></i> Freeze Account Immediately
+                            </button>
+
+                            <!-- Unfreeze Trigger -->
+                            <button th:if="${account.frozen}" type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#unfreezeModal">
+                                <i class="bi bi-unlock-fill me-1"></i> Unfreeze Account Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <!-- Quick Security Controls -->
+                    <div class="col-lg-6">
+                        <div class="card card-banking h-100">
+                            <div class="card-header-banking">
+                                <span><i class="bi bi-gear text-primary me-2"></i>Security Controls</span>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="list-group list-group-flush">
+                                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
+                                        <div>
+                                            <div class="fw-bold text-dark small">4-Digit ATM PIN</div>
+                                            <div class="text-muted" style="font-size: 0.78rem;">Required for all cash withdrawals and fund transfers</div>
+                                        </div>
+                                        <a th:href="@{/account/change-pin}" class="btn btn-sm btn-outline-primary">Change PIN</a>
+                                    </div>
+                                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
+                                        <div>
+                                            <div class="fw-bold text-dark small">Account Ownership &amp; Profile</div>
+                                            <div class="text-muted" style="font-size: 0.78rem;">Verify contact phone number and registered email address</div>
+                                        </div>
+                                        <a th:href="@{/profile}" class="btn btn-sm btn-outline-secondary">Edit Details</a>
+                                    </div>
+                                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
+                                        <div>
+                                            <div class="fw-bold text-dark small">Failed Login Attempts</div>
+                                            <div class="text-muted" style="font-size: 0.78rem;">Consecutive failed logins lock account at 5 attempts</div>
+                                        </div>
+                                        <span class="badge bg-light text-dark border font-monospace" th:text="${user.failedLoginAttempts + ' / 5 Failed'}">0 / 5</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Activity Feed -->
+                    <div class="col-lg-6">
+                        <div class="card card-banking h-100">
+                            <div class="card-header-banking">
+                                <span><i class="bi bi-shield-slash text-danger me-2"></i>Recent Fraud &amp; Security Alerts</span>
+                                <a th:href="@{/security/alerts}" class="btn btn-sm btn-link p-0 text-decoration-none">View All</a>
+                            </div>
+                            <div class="card-body p-4">
+                                <div th:if="${#lists.isEmpty(alerts)}" class="text-center text-muted py-4 small">
+                                    <i class="bi bi-shield-check fs-2 text-success d-block mb-1"></i>
+                                    No suspicious activity or fraud alerts detected on your account.
+                                </div>
+                                <div class="list-group list-group-flush" th:unless="${#lists.isEmpty(alerts)}">
+                                    <div class="list-group-item px-0 py-2 border-bottom" th:each="al : ${alerts}">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fw-semibold small text-danger font-monospace" th:text="${al.ruleTriggered}">RULE_ALERT</span>
+                                            <span class="badge bg-light text-secondary border" style="font-size: 0.7rem;" th:text="${#temporals.format(al.createdAt, 'yyyy-MM-dd HH:mm')}">Date</span>
+                                        </div>
+                                        <div class="small text-muted mt-1" th:text="${al.description}">Alert description</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FREEZE MODAL -->
+                <div class="modal fade" id="freezeModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <form th:action="@{/security/freeze}" th:object="${freezeDto}" method="post">
+                                <div class="modal-header bg-danger text-white">
+                                    <h5 class="modal-title fs-6"><i class="bi bi-snow2 me-2"></i>Instant Account Freeze Confirmation</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body p-4">
+                                    <div class="alert alert-warning small mb-3">
+                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                        <strong>Caution:</strong> Freezing your account will immediately block all ATM cash withdrawals, money transfers, and emergency approvals.
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="reason" class="form-label fw-semibold small text-secondary">Reason for Freezing *</label>
+                                        <input type="text" id="reason" th:field="*{reason}" class="form-control" placeholder="e.g. Lost ATM card, suspected unauthorized access" required>
+                                    </div>
+
+                                    <div class="mb-3 text-center">
+                                        <label for="freezeAtmPin" class="form-label fw-semibold small text-danger">Authorize with 4-Digit ATM PIN *</label>
+                                        <input type="password" id="freezeAtmPin" th:field="*{atmPin}" class="form-control font-monospace fs-4 text-center mx-auto" style="max-width: 180px;" placeholder="••••" maxlength="4" pattern="[0-9]{4}" required autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-danger btn-sm">Yes, Freeze My Account Now</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- UNFREEZE MODAL -->
+                <div class="modal fade" id="unfreezeModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <form th:action="@{/security/unfreeze}" th:object="${unfreezeDto}" method="post">
+                                <div class="modal-header bg-success text-white">
+                                    <h5 class="modal-title fs-6"><i class="bi bi-unlock-fill me-2"></i>Unfreeze Account</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body p-4">
+                                    <p class="small text-muted mb-3">
+                                        To unfreeze your account and restore cash withdrawals and transfers, please verify your identity with your 4-digit ATM PIN:
+                                    </p>
+                                    <div class="mb-3 text-center">
+                                        <label for="unfreezeAtmPin" class="form-label fw-semibold small text-secondary">Enter 4-Digit ATM PIN *</label>
+                                        <input type="password" id="unfreezeAtmPin" th:field="*{atmPin}" class="form-control font-monospace fs-4 text-center mx-auto" style="max-width: 180px;" placeholder="••••" maxlength="4" pattern="[0-9]{4}" required autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-success btn-sm">Verify PIN &amp; Unfreeze</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

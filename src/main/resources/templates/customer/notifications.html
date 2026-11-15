@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('In-App Notifications')}">
+    <title>Notifications</title>
+</head>
+<body>
+    <div class="app-wrapper">
+        <aside th:replace="~{fragments/sidebar :: sidebar('notifications')}"></aside>
+
+        <main class="main-content">
+            <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+            <div class="content-body">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1"><i class="bi bi-bell text-primary me-2"></i>Notifications Center</h4>
+                        <p class="text-muted small mb-0">Stay updated with instant transaction alerts and security warnings</p>
+                    </div>
+                    <div th:if="${unreadCount != null && unreadCount > 0}">
+                        <form th:action="@{/notifications/read-all}" method="post" class="m-0">
+                            <button type="submit" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-check2-all me-1"></i> Mark All as Read
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card card-banking">
+                    <div class="card-header-banking">
+                        <span><i class="bi bi-inbox-fill text-primary me-2"></i>Activity Notifications</span>
+                        <span class="badge bg-light text-secondary border" th:text="${unreadCount != null ? unreadCount : 0} + ' Unread'">0 Unread</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div th:if="${#lists.isEmpty(notifications)}" class="text-center text-muted py-5">
+                            <i class="bi bi-bell-slash fs-1 d-block mb-2 text-secondary"></i>
+                            <h5 class="fw-bold">No Notifications Yet</h5>
+                            <p class="small text-muted">You will receive notifications for deposits, withdrawals, transfers, and security events here.</p>
+                        </div>
+
+                        <div class="list-group list-group-flush" th:unless="${#lists.isEmpty(notifications)}">
+                            <div class="list-group-item p-3 border-bottom d-flex align-items-start gap-3"
+                                 th:each="n : ${notifications}"
+                                 th:classappend="${!n.read ? 'bg-light bg-opacity-75' : ''}">
+                                <div class="rounded-circle p-2 d-flex align-items-center justify-content-center flex-shrink-0"
+                                     th:classappend="${n.type == 'SUCCESS' ? 'bg-success bg-opacity-10 text-success' : (n.type == 'WARNING' ? 'bg-warning bg-opacity-10 text-warning' : (n.type == 'DANGER' ? 'bg-danger bg-opacity-10 text-danger' : 'bg-primary bg-opacity-10 text-primary'))}"
+                                     style="width: 42px; height: 42px;">
+                                    <i class="fs-5"
+                                       th:classappend="${n.type == 'SUCCESS' ? 'bi bi-check-circle-fill' : (n.type == 'WARNING' ? 'bi bi-exclamation-triangle-fill' : (n.type == 'DANGER' ? 'bi bi-shield-slash-fill' : 'bi bi-info-circle-fill'))}"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <h6 class="fw-bold mb-0 text-dark" th:text="${n.title}">Notification Title</h6>
+                                        <span class="text-muted" style="font-size: 0.72rem;" th:text="${#temporals.format(n.createdAt, 'yyyy-MM-dd HH:mm')}">Date</span>
+                                    </div>
+                                    <p class="mb-2 text-secondary small" th:text="${n.message}">Notification message detail.</p>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <a th:if="${n.link}" th:href="${n.link}" class="btn btn-sm btn-link p-0 text-decoration-none small">
+                                            View Related Resource <i class="bi bi-arrow-right"></i>
+                                        </a>
+                                        <form th:if="${!n.read}" th:action="@{'/notifications/' + ${n.id} + '/read'}" method="post" class="m-0">
+                                            <button type="submit" class="btn btn-sm btn-link text-muted p-0 text-decoration-none" style="font-size: 0.75rem;">
+                                                <i class="bi bi-check"></i> Mark read
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

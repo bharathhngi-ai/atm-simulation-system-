@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Change ATM PIN')}">
+    <title>Change ATM PIN</title>
+</head>
+<body>
+    <div class="app-wrapper">
+        <aside th:replace="~{fragments/sidebar :: sidebar('change-pin')}"></aside>
+
+        <main class="main-content">
+            <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+            <div class="content-body">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <div class="mb-4">
+                    <h4 class="fw-bold text-dark mb-1"><i class="bi bi-key text-primary me-2"></i>Change ATM Security PIN</h4>
+                    <p class="text-muted small mb-0">Update your 4-digit secret authorization PIN securely</p>
+                </div>
+
+                <div class="row justify-content-center">
+                    <div class="col-lg-7">
+                        <div class="card card-banking">
+                            <div class="card-header-banking">
+                                <span><i class="bi bi-shield-lock me-2 text-primary"></i>ATM PIN Update Terminal</span>
+                                <span class="badge bg-light text-secondary border font-monospace" th:text="'Account: ' + ${account.accountNumber}">Account #</span>
+                            </div>
+                            <div class="card-body p-4">
+                                <form th:action="@{/account/change-pin}" th:object="${pinDto}" method="post">
+                                    <div class="mb-3">
+                                        <label for="currentPin" class="form-label fw-semibold small text-secondary">Current 4-Digit ATM PIN *</label>
+                                        <input type="password" id="currentPin" th:field="*{currentPin}" class="form-control font-monospace fs-4 text-center mx-auto" style="max-width: 200px;" placeholder="••••" maxlength="4" pattern="[0-9]{4}" required autocomplete="off">
+                                        <div class="text-danger small mt-1 text-center" th:if="${#fields.hasErrors('currentPin')}" th:errors="*{currentPin}"></div>
+                                    </div>
+
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-md-6">
+                                            <label for="newPin" class="form-label fw-semibold small text-secondary">New 4-Digit PIN *</label>
+                                            <input type="password" id="newPin" th:field="*{newPin}" class="form-control font-monospace fs-4 text-center" placeholder="••••" maxlength="4" pattern="[0-9]{4}" required autocomplete="off">
+                                            <div class="text-danger small mt-1 text-center" th:if="${#fields.hasErrors('newPin')}" th:errors="*{newPin}"></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="confirmPin" class="form-label fw-semibold small text-secondary">Confirm New PIN *</label>
+                                            <input type="password" id="confirmPin" th:field="*{confirmPin}" class="form-control font-monospace fs-4 text-center" placeholder="••••" maxlength="4" pattern="[0-9]{4}" required autocomplete="off">
+                                            <div class="text-danger small mt-1 text-center" th:if="${#fields.hasErrors('confirmPin')}" th:errors="*{confirmPin}"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Keypad Guide -->
+                                    <div class="atm-keypad-wrapper mb-4" data-target="currentPin">
+                                        <div class="text-center small text-muted mb-2">On-Screen Security Keypad:</div>
+                                        <div class="atm-keypad">
+                                            <button type="button" class="atm-keypad-btn" data-val="1">1</button>
+                                            <button type="button" class="atm-keypad-btn" data-val="2">2</button>
+                                            <button type="button" class="atm-keypad-btn" data-val="3">3</button>
+                                            <button type="button" class="atm-keypad-btn" data-val="4">4</button>
+                                            <button type="button" class="atm-keypad-btn" data-val="5">5</button>
+                                            <button type="button" class="atm-keypad-btn" data-val="6">6</button>
+                                            <button type="button" class="atm-keypad-btn" data-val="7">7</button>
+                                            <button type="button" class="atm-keypad-btn" data-val="8">8</button>
+                                            <button type="button" class="atm-keypad-btn" data-val="9">9</button>
+                                            <button type="button" class="atm-keypad-btn text-danger small" data-val="clear">C</button>
+                                            <button type="button" class="atm-keypad-btn" data-val="0">0</button>
+                                            <button type="button" class="atm-keypad-btn text-secondary" data-val="back"><i class="bi bi-backspace"></i></button>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-light p-3 rounded small text-muted mb-4">
+                                        <div class="fw-bold mb-1"><i class="bi bi-shield-check text-primary me-1"></i>PIN Security Guidelines:</div>
+                                        <div>• Never use obvious sequences (e.g., 1234, 0000, 1111).</div>
+                                        <div>• Never share your ATM PIN with anyone, including bank staff.</div>
+                                        <div>• New PIN takes effect immediately for all ATM withdrawals and transfers.</div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary w-100 py-3 fw-semibold shadow-sm">
+                                        <i class="bi bi-check-circle me-1"></i> Confirm &amp; Update ATM PIN
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

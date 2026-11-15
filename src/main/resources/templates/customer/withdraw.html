@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('ATM Cash Withdrawal')}">
+    <title>ATM Cash Withdrawal</title>
+</head>
+<body>
+    <div class="app-wrapper">
+        <aside th:replace="~{fragments/sidebar :: sidebar('withdraw')}"></aside>
+
+        <main class="main-content">
+            <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+            <div class="content-body">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <div class="mb-4">
+                    <h4 class="fw-bold text-dark mb-1"><i class="bi bi-arrow-up-circle text-danger me-2"></i>Cash Withdrawal</h4>
+                    <p class="text-muted small mb-0">Dispense cash instantly using your 4-digit ATM PIN</p>
+                </div>
+
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="card card-banking">
+                            <div class="card-header-banking">
+                                <span><i class="bi bi-cash me-2 text-danger"></i>ATM Cash Dispenser</span>
+                                <span class="badge bg-light text-secondary border font-monospace" th:text="'Account: ' + ${account.accountNumber}">Account #</span>
+                            </div>
+                            <div class="card-body p-4">
+                                <form th:action="@{/transactions/withdraw}" th:object="${withdrawDto}" method="post">
+                                    <input type="hidden" th:field="*{idempotencyKey}">
+
+                                    <div class="row">
+                                        <div class="col-md-7">
+                                            <!-- Fast Cash Selection -->
+                                            <label class="form-label fw-semibold small text-secondary">Fast Cash Selection</label>
+                                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                                <button type="button" class="btn btn-outline-secondary btn-sm amount-chip" data-amount="100.00" data-target="amount">₹100</button>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm amount-chip" data-amount="200.00" data-target="amount">₹200</button>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm amount-chip" data-amount="500.00" data-target="amount">₹500</button>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm amount-chip" data-amount="1000.00" data-target="amount">₹1,000</button>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm amount-chip" data-amount="2000.00" data-target="amount">₹2,000</button>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm amount-chip" data-amount="5000.00" data-target="amount">₹5,000</button>
+                                            </div>
+
+                                            <!-- Custom Amount -->
+                                            <div class="mb-3">
+                                                <label for="amount" class="form-label fw-semibold small text-secondary">Withdrawal Amount (₹) *</label>
+                                                <div class="input-group input-group-lg">
+                                                    <span class="input-group-text bg-light text-danger fw-bold">₹</span>
+                                                    <input type="number" step="10.00" min="10.00" max="50000.00" id="amount" th:field="*{amount}" class="form-control font-monospace" placeholder="0.00" required>
+                                                </div>
+                                                <div class="text-danger small mt-1" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></div>
+                                                <div class="form-text small">Minimum ₹10.00 • Max ₹50,000.00 per transaction</div>
+                                            </div>
+
+                                            <div class="bg-light p-3 rounded mb-3 small">
+                                                <div class="d-flex justify-content-between mb-1">
+                                                    <span class="text-muted">Available Balance:</span>
+                                                    <strong class="font-monospace text-primary" th:text="'₹' + ${#numbers.formatDecimal(account.balance, 1, 'COMMA', 2, 'POINT')}">₹0.00</strong>
+                                                </div>
+                                                <div class="d-flex justify-content-between">
+                                                    <span class="text-muted">Daily Limit Remaining:</span>
+                                                    <span class="font-monospace text-muted" th:text="'₹' + ${#numbers.formatDecimal(account.dailyWithdrawalLimit, 1, 'COMMA', 2, 'POINT')}">₹50,000.00</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- PIN and Keypad -->
+                                        <div class="col-md-5 border-start-md">
+                                            <div class="text-center mb-2">
+                                                <label for="atmPin" class="form-label fw-semibold small text-secondary">Enter 4-Digit ATM PIN *</label>
+                                                <input type="password" id="atmPin" th:field="*{atmPin}" class="form-control text-center font-monospace fs-4 tracking-widest mx-auto" style="max-width: 180px;" placeholder="••••" maxlength="4" pattern="[0-9]{4}" required autocomplete="off">
+                                                <div class="text-danger small mt-1" th:if="${#fields.hasErrors('atmPin')}" th:errors="*{atmPin}"></div>
+                                            </div>
+
+                                            <!-- Virtual Keypad -->
+                                            <div class="atm-keypad-wrapper" data-target="atmPin">
+                                                <div class="atm-keypad">
+                                                    <button type="button" class="atm-keypad-btn" data-val="1">1</button>
+                                                    <button type="button" class="atm-keypad-btn" data-val="2">2</button>
+                                                    <button type="button" class="atm-keypad-btn" data-val="3">3</button>
+                                                    <button type="button" class="atm-keypad-btn" data-val="4">4</button>
+                                                    <button type="button" class="atm-keypad-btn" data-val="5">5</button>
+                                                    <button type="button" class="atm-keypad-btn" data-val="6">6</button>
+                                                    <button type="button" class="atm-keypad-btn" data-val="7">7</button>
+                                                    <button type="button" class="atm-keypad-btn" data-val="8">8</button>
+                                                    <button type="button" class="atm-keypad-btn" data-val="9">9</button>
+                                                    <button type="button" class="atm-keypad-btn text-danger small" data-val="clear">C</button>
+                                                    <button type="button" class="atm-keypad-btn" data-val="0">0</button>
+                                                    <button type="button" class="atm-keypad-btn text-secondary" data-val="back"><i class="bi bi-backspace"></i></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-4">
+
+                                    <button type="submit" class="btn btn-danger w-100 py-3 fw-semibold shadow-sm">
+                                        <i class="bi bi-arrow-up-circle me-1"></i> Authorize &amp; Dispense Cash
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

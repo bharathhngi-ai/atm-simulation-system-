@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Balance Inquiry')}">
+    <title>Balance Inquiry</title>
+</head>
+<body>
+    <div class="app-wrapper">
+        <aside th:replace="~{fragments/sidebar :: sidebar('balance')}"></aside>
+
+        <main class="main-content">
+            <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+            <div class="content-body">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1"><i class="bi bi-wallet2 text-primary me-2"></i>Account Balance Inquiry</h4>
+                        <p class="text-muted small mb-0">Official real-time available balance statement slip</p>
+                    </div>
+                    <div>
+                        <button onclick="window.print()" class="btn btn-outline-dark btn-sm">
+                            <i class="bi bi-printer me-1"></i> Print Slip
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row justify-content-center">
+                    <div class="col-md-8 col-lg-6">
+                        <div class="receipt-container mb-4">
+                            <div class="receipt-header">
+                                <div class="fs-4 fw-bold text-primary mb-1">SMART BANKING ATM</div>
+                                <div class="text-muted small">ATM TERMINAL #01 • 24/7 SECURE NETWORK</div>
+                                <div class="badge bg-light text-secondary border mt-2">ACCOUNT BALANCE INQUIRY SLIP</div>
+                            </div>
+
+                            <div class="receipt-row">
+                                <span class="text-muted">Customer Name:</span>
+                                <strong th:text="${user.fullName}">John Doe</strong>
+                            </div>
+                            <div class="receipt-row">
+                                <span class="text-muted">Account Number:</span>
+                                <strong class="font-monospace" th:text="${account.accountNumber}">1001XXXXXXXX</strong>
+                            </div>
+                            <div class="receipt-row">
+                                <span class="text-muted">Account Type:</span>
+                                <span class="badge bg-light text-dark border" th:text="${account.accountType}">SAVINGS</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span class="text-muted">Account Status:</span>
+                                <span th:if="${account.active}" class="badge badge-status badge-active">ACTIVE</span>
+                                <span th:if="${account.frozen}" class="badge badge-status badge-frozen">FROZEN</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span class="text-muted">Inquiry Timestamp:</span>
+                                <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd HH:mm:ss')}">2026-11-12</span>
+                            </div>
+
+                            <hr class="my-3 border-dashed">
+
+                            <div class="p-3 bg-light rounded text-center my-3">
+                                <div class="text-muted small text-uppercase fw-semibold">Net Available Balance</div>
+                                <div class="display-6 fw-bold text-primary font-monospace my-1" th:text="'₹' + ${#numbers.formatDecimal(balance, 1, 'COMMA', 2, 'POINT')}">₹0.00</div>
+                                <div class="text-success small"><i class="bi bi-shield-check me-1"></i>Verified &amp; Database Reconciled</div>
+                            </div>
+
+                            <div class="receipt-row text-muted small">
+                                <span>Daily Cash Withdrawal Limit:</span>
+                                <span class="font-monospace" th:text="'₹' + ${#numbers.formatDecimal(account.dailyWithdrawalLimit, 1, 'COMMA', 2, 'POINT')}">₹50,000.00</span>
+                            </div>
+                            <div class="receipt-row text-muted small">
+                                <span>Daily Online Transfer Limit:</span>
+                                <span class="font-monospace" th:text="'₹' + ${#numbers.formatDecimal(account.dailyTransferLimit, 1, 'COMMA', 2, 'POINT')}">₹100,000.00</span>
+                            </div>
+
+                            <div class="text-center text-muted small mt-4 pt-3 border-top">
+                                Thank you for banking with Smart ATM Banking.<br>
+                                Please retain this slip for your records.
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons below slip -->
+                        <div class="d-flex justify-content-center gap-2">
+                            <a th:href="@{/transactions/withdraw}" class="btn btn-outline-danger btn-sm">
+                                <i class="bi bi-arrow-up-circle me-1"></i>Withdraw Cash
+                            </a>
+                            <a th:href="@{/transactions/deposit}" class="btn btn-outline-success btn-sm">
+                                <i class="bi bi-arrow-down-circle me-1"></i>Deposit Funds
+                            </a>
+                            <a th:href="@{/transactions/transfer}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-arrow-left-right me-1"></i>Transfer
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

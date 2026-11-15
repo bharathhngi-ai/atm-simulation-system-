@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Fraud Monitoring & Resolution')}">
+    <title>Fraud Monitoring</title>
+</head>
+<body>
+    <div class="app-wrapper">
+        <aside th:replace="~{fragments/sidebar :: sidebar('admin-fraud')}"></aside>
+
+        <main class="main-content">
+            <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+            <div class="content-body">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1"><i class="bi bi-shield-slash text-danger me-2"></i>Smart Rule-Based Fraud Monitoring</h4>
+                        <p class="text-muted small mb-0">Automated triggers: Rapid withdrawals, high-value transfers, and failed login brute force</p>
+                    </div>
+                </div>
+
+                <!-- Filter Card -->
+                <div class="card card-banking mb-4">
+                    <div class="card-body p-3">
+                        <form th:action="@{/admin/fraud-alerts}" method="get" class="row g-2 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-secondary">Alert Status</label>
+                                <select name="status" class="form-select form-select-sm">
+                                    <option value="">All Statuses</option>
+                                    <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}" th:selected="${s == selectedStatus}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-secondary">Severity Level</label>
+                                <select name="severity" class="form-select form-select-sm">
+                                    <option value="">All Severities</option>
+                                    <option th:each="sev : ${severities}" th:value="${sev}" th:text="${sev}" th:selected="${sev == selectedSeverity}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary btn-sm flex-grow-1">Filter Alerts</button>
+                                <a th:href="@{/admin/fraud-alerts}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-counterclockwise"></i></a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Alerts Table Card -->
+                <div class="card card-banking">
+                    <div class="card-header-banking">
+                        <span><i class="bi bi-shield-exclamation text-danger me-2"></i>Security Incident Queue</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-banking">
+                            <thead>
+                                <tr>
+                                    <th>Code / Date</th>
+                                    <th>Target Account</th>
+                                    <th>Triggered Rule</th>
+                                    <th>Incident Description</th>
+                                    <th>Severity</th>
+                                    <th>Status</th>
+                                    <th>Resolution</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${#lists.isEmpty(alerts)}">
+                                    <td colspan="8" class="text-center text-muted py-5">
+                                        <i class="bi bi-shield-check fs-2 text-success d-block mb-1"></i>No fraud alerts matching filter.
+                                    </td>
+                                </tr>
+                                <tr th:each="al : ${alerts}">
+                                    <td>
+                                        <div class="font-monospace fw-bold text-primary small" th:text="${al.alertCode}">FRD-01</div>
+                                        <div class="text-muted" style="font-size: 0.72rem;" th:text="${#temporals.format(al.createdAt, 'yyyy-MM-dd HH:mm')}">Date</div>
+                                    </td>
+                                    <td>
+                                        <div th:if="${al.account}" class="font-monospace small fw-bold" th:text="${al.account.accountNumber}">1001XXXXXXXX</div>
+                                        <div th:if="${al.user}" class="text-muted small" th:text="${al.user.fullName}">Customer</div>
+                                    </td>
+                                    <td class="font-monospace small fw-semibold text-danger" th:text="${al.ruleTriggered}">RAPID_WITHDRAWALS</td>
+                                    <td class="small" th:text="${al.description}">Incident notes</td>
+                                    <td>
+                                        <span th:if="${al.severity.name() == 'CRITICAL'}" class="badge bg-danger">CRITICAL</span>
+                                        <span th:if="${al.severity.name() == 'HIGH'}" class="badge bg-warning text-dark">HIGH</span>
+                                        <span th:if="${al.severity.name() == 'MEDIUM'}" class="badge bg-info text-dark">MEDIUM</span>
+                                        <span th:if="${al.severity.name() == 'LOW'}" class="badge bg-secondary">LOW</span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${al.status.name() == 'OPEN'}" class="badge bg-danger">OPEN</span>
+                                        <span th:if="${al.status.name() == 'UNDER_REVIEW'}" class="badge bg-warning text-dark">IN REVIEW</span>
+                                        <span th:if="${al.status.name() == 'RESOLVED'}" class="badge bg-success">RESOLVED</span>
+                                        <span th:if="${al.status.name() == 'DISMISSED'}" class="badge bg-secondary">DISMISSED</span>
+                                    </td>
+                                    <td class="small text-muted">
+                                        <div th:if="${al.resolutionNotes}" th:text="${al.resolutionNotes}">Notes</div>
+                                        <div th:if="${al.resolvedBy}" style="font-size: 0.72rem;" th:text="'By: ' + ${al.resolvedBy}">Admin</div>
+                                        <div th:unless="${al.resolutionNotes}">-</div>
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" th:data-bs-target="'#resolveModal' + ${al.id}">
+                                            <i class="bi bi-pencil-square me-1"></i>Resolve
+                                        </button>
+
+                                        <!-- RESOLUTION MODAL -->
+                                        <div class="modal fade" th:id="'resolveModal' + ${al.id}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content text-start">
+                                                    <form th:action="@{'/admin/fraud-alerts/' + ${al.alertCode} + '/resolve'}" method="post">
+                                                        <div class="modal-header bg-primary text-white">
+                                                            <h5 class="modal-title fs-6"><i class="bi bi-shield-check me-2"></i>Resolve Fraud Alert: <span th:text="${al.alertCode}">FRD</span></h5>
+                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body p-4">
+                                                            <div class="p-3 bg-light rounded mb-3 small">
+                                                                <div class="fw-bold text-dark mb-1" th:text="${al.ruleTriggered}">RULE</div>
+                                                                <div class="text-muted" th:text="${al.description}">Description</div>
+                                                            </div>
+
+                                                            <div class="mb-3">
+                                                                <label class="form-label small fw-semibold text-secondary">New Status *</label>
+                                                                <select name="status" class="form-select form-select-sm" required>
+                                                                    <option value="UNDER_REVIEW">UNDER_REVIEW</option>
+                                                                    <option value="RESOLVED" selected>RESOLVED (Cleared)</option>
+                                                                    <option value="DISMISSED">DISMISSED (False Alarm)</option>
+                                                                </select>
+                                                            </div>
+
+                                                            <div class="mb-3">
+                                                                <label class="form-label small fw-semibold text-secondary">Investigation &amp; Resolution Notes *</label>
+                                                                <textarea name="resolutionNotes" class="form-control" rows="3" placeholder="Enter findings, verification calls, or action taken..." required minlength="5"></textarea>
+                                                            </div>
+
+                                                            <div class="form-check p-3 bg-danger bg-opacity-10 border border-danger rounded" th:if="${al.account != null && al.account.active}">
+                                                                <input class="form-check-input" type="checkbox" name="freezeAccount" value="true" id="freezeCheck">
+                                                                <label class="form-check-label small fw-bold text-danger" for="freezeCheck">
+                                                                    <i class="bi bi-snow2 me-1"></i> Also Freeze this Bank Account immediately
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                                            <button type="submit" class="btn btn-primary btn-sm">Save Resolution</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3" th:if="${totalPages > 1}">
+                        <div class="text-muted small">
+                            Page <strong th:text="${currentPage + 1}">1</strong> of <strong th:text="${totalPages}">1</strong>
+                        </div>
+                        <ul class="pagination pagination-sm m-0">
+                            <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                                <a class="page-link" th:href="@{/admin/fraud-alerts(page=${currentPage - 1}, status=${selectedStatus}, severity=${selectedSeverity})}">Previous</a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage ? 'active' : ''}">
+                                <a class="page-link" th:href="@{/admin/fraud-alerts(page=${i}, status=${selectedStatus}, severity=${selectedSeverity})}" th:text="${i + 1}">1</a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages ? 'disabled' : ''}">
+                                <a class="page-link" th:href="@{/admin/fraud-alerts(page=${currentPage + 1}, status=${selectedStatus}, severity=${selectedSeverity})}">Next</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

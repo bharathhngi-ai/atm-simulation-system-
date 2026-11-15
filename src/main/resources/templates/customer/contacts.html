@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Trusted Contacts')}">
+    <title>Trusted Contacts</title>
+</head>
+<body>
+    <div class="app-wrapper">
+        <aside th:replace="~{fragments/sidebar :: sidebar('contacts')}"></aside>
+
+        <main class="main-content">
+            <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+            <div class="content-body">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1"><i class="bi bi-people text-primary me-2"></i>Trusted Banking Contacts</h4>
+                        <p class="text-muted small mb-0">Manage saved payees for quick money transfers and emergency requests</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#addContactCollapse">
+                            <i class="bi bi-person-plus me-1"></i> Add New Contact
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Add Contact Form Collapse -->
+                <div class="collapse mb-4" id="addContactCollapse">
+                    <div class="card card-banking border-primary">
+                        <div class="card-header-banking bg-light">
+                            <span class="text-primary"><i class="bi bi-person-plus-fill me-2"></i>Add Trusted Payee</span>
+                        </div>
+                        <div class="card-body p-4">
+                            <form th:action="@{/contacts/add}" th:object="${contactDto}" method="post">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-semibold text-secondary">Contact Account Number (12 Digits) *</label>
+                                        <input type="text" th:field="*{contactAccountNumber}" class="form-control font-monospace" placeholder="1001XXXXXXXX" maxlength="12" pattern="[0-9]{12}" required>
+                                        <div class="text-danger small mt-1" th:if="${#fields.hasErrors('contactAccountNumber')}" th:errors="*{contactAccountNumber}"></div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-semibold text-secondary">Nickname / Full Name *</label>
+                                        <input type="text" th:field="*{nickname}" class="form-control" placeholder="e.g. Jane Smith (Sister)" required>
+                                        <div class="text-danger small mt-1" th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}"></div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-semibold text-secondary">Relationship (Optional)</label>
+                                        <input type="text" th:field="*{relationship}" class="form-control" placeholder="e.g. Family, Landlord, Friend">
+                                    </div>
+                                </div>
+                                <div class="mt-3 text-end">
+                                    <button type="submit" class="btn btn-primary btn-sm px-4">Save Trusted Contact</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contacts List Grid -->
+                <div class="row g-3">
+                    <div th:if="${#lists.isEmpty(contacts)}" class="col-12">
+                        <div class="card card-banking p-5 text-center text-muted">
+                            <i class="bi bi-person-lines-fill fs-1 text-secondary mb-2"></i>
+                            <h5 class="fw-bold">No Trusted Contacts Saved</h5>
+                            <p class="small text-muted mb-3">Add contacts to quickly transfer money without typing their 12-digit account number every time.</p>
+                            <div>
+                                <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#addContactCollapse">
+                                    <i class="bi bi-plus-lg me-1"></i>Add First Contact
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-4" th:each="c : ${contacts}">
+                        <div class="card card-banking h-100">
+                            <div class="card-body p-4 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                                            <i class="bi bi-person-fill fs-5"></i>
+                                        </div>
+                                        <span class="badge bg-light text-secondary border small" th:text="${c.relationship != null && !c.relationship.isBlank() ? c.relationship : 'Payee'}">Friend</span>
+                                    </div>
+                                    <h5 class="fw-bold text-dark mb-1" th:text="${c.nickname}">Jane Smith</h5>
+                                    <div class="font-monospace text-muted small mb-2" th:text="${c.contactAccount.accountNumber}">1001XXXXXXXX</div>
+                                    <div class="text-muted small">
+                                        <i class="bi bi-person-check me-1"></i>Holder: <span th:text="${c.contactAccount.user.fullName}">Jane Smith</span>
+                                    </div>
+                                </div>
+
+                                <div class="border-top pt-3 mt-3 d-flex justify-content-between align-items-center">
+                                    <a th:href="@{/transactions/transfer(to=${c.contactAccount.accountNumber})}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-send me-1"></i>Send Money
+                                    </a>
+                                    <form th:action="@{'/contacts/' + ${c.id} + '/delete'}" method="post" class="m-0"
+                                          onsubmit="return confirm('Remove this contact from your trusted list?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove Contact">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

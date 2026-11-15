@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Administrator Dashboard')}">
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <div class="app-wrapper">
+        <aside th:replace="~{fragments/sidebar :: sidebar('admin-dashboard')}"></aside>
+
+        <main class="main-content">
+            <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+            <div class="content-body">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <!-- Admin Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h3 class="fw-bold text-dark mb-0">System Control &amp; Monitoring Dashboard</h3>
+                        <p class="text-muted small mb-0">ATM Simulation Platform Management • Enterprise Security Ops</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a th:href="@{/admin/fraud-alerts}" class="btn btn-danger btn-sm">
+                            <i class="bi bi-shield-exclamation me-1"></i> Fraud Alerts
+                            <span class="badge bg-white text-danger ms-1" th:text="${stats.openFraudAlerts}">0</span>
+                        </a>
+                        <a th:href="@{/admin/audit-logs}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-journal-text me-1"></i> Audit Logs
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Metrics Grid -->
+                <div class="row g-3 mb-4">
+                    <!-- Total Vault Balance -->
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="card card-banking p-3 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted small fw-semibold text-uppercase">Total Vault Balance</span>
+                                <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-2">
+                                    <i class="bi bi-bank fs-5"></i>
+                                </div>
+                            </div>
+                            <h4 class="fw-bold text-primary mb-1 font-monospace" th:text="'₹' + ${#numbers.formatDecimal(stats.totalBankBalance, 1, 'COMMA', 2, 'POINT')}">₹0.00</h4>
+                            <div class="text-muted small">Combined accounts liquidity</div>
+                        </div>
+                    </div>
+
+                    <!-- Customers & Accounts -->
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="card card-banking p-3 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted small fw-semibold text-uppercase">Total Accounts</span>
+                                <div class="rounded-circle bg-info bg-opacity-10 text-info p-2">
+                                    <i class="bi bi-people fs-5"></i>
+                                </div>
+                            </div>
+                            <h4 class="fw-bold text-dark mb-1 font-monospace" th:text="${stats.totalAccounts}">0</h4>
+                            <div class="small">
+                                <span class="text-success"><strong th:text="${stats.activeAccounts}">0</strong> Active</span> •
+                                <span class="text-danger"><strong th:text="${stats.frozenAccounts}">0</strong> Frozen</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Open Fraud Alerts -->
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="card card-banking p-3 h-100" th:classappend="${(stats.openFraudAlerts as Number).longValue() > 0 ? 'border-danger' : ''}">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted small fw-semibold text-uppercase">Open Fraud Alerts</span>
+                                <div class="rounded-circle bg-danger bg-opacity-10 text-danger p-2">
+                                    <i class="bi bi-shield-slash fs-5"></i>
+                                </div>
+                            </div>
+                            <h4 class="fw-bold text-danger mb-1 font-monospace" th:text="${stats.openFraudAlerts}">0</h4>
+                            <div class="text-muted small" th:text="'Out of ' + ${stats.totalFraudAlerts} + ' total alerts'">Rule-based detection</div>
+                        </div>
+                    </div>
+
+                    <!-- Total Transactions -->
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="card card-banking p-3 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted small fw-semibold text-uppercase">Total Operations</span>
+                                <div class="rounded-circle bg-success bg-opacity-10 text-success p-2">
+                                    <i class="bi bi-arrow-repeat fs-5"></i>
+                                </div>
+                            </div>
+                            <h4 class="fw-bold text-success mb-1 font-monospace" th:text="${stats.totalTransactions}">0</h4>
+                            <div class="small text-muted">
+                                <span class="text-success" th:text="${stats.successfulTx}">0</span> Success •
+                                <span class="text-danger" th:text="${stats.failedTx}">0</span> Failed
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction Volume Summary Banner -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="card card-banking p-3 border-start border-success border-4">
+                            <div class="text-muted small">Total Deposits Processed</div>
+                            <div class="fs-5 fw-bold text-success font-monospace" th:text="'₹' + ${#numbers.formatDecimal(stats.totalDeposits, 1, 'COMMA', 2, 'POINT')}">₹0.00</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card card-banking p-3 border-start border-danger border-4">
+                            <div class="text-muted small">Total Withdrawals Dispensed</div>
+                            <div class="fs-5 fw-bold text-danger font-monospace" th:text="'₹' + ${#numbers.formatDecimal(stats.totalWithdrawals, 1, 'COMMA', 2, 'POINT')}">₹0.00</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card card-banking p-3 border-start border-primary border-4">
+                            <div class="text-muted small">Total Transfers Cleared</div>
+                            <div class="fs-5 fw-bold text-primary font-monospace" th:text="'₹' + ${#numbers.formatDecimal(stats.totalTransfers, 1, 'COMMA', 2, 'POINT')}">₹0.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Recent Fraud Alerts -->
+                    <div class="col-lg-6">
+                        <div class="card card-banking h-100">
+                            <div class="card-header-banking">
+                                <span><i class="bi bi-shield-exclamation text-danger me-2"></i>Suspicious Activity &amp; Fraud Alerts</span>
+                                <a th:href="@{/admin/fraud-alerts}" class="btn btn-sm btn-outline-danger">Review All</a>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-banking">
+                                    <thead>
+                                        <tr>
+                                            <th>Code</th>
+                                            <th>Rule</th>
+                                            <th>Severity</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:if="${#lists.isEmpty(recentAlerts)}">
+                                            <td colspan="4" class="text-center text-muted py-4">No fraud alerts on record.</td>
+                                        </tr>
+                                        <tr th:each="al : ${recentAlerts}">
+                                            <td class="font-monospace small fw-bold text-primary" th:text="${al.alertCode}">FRD-01</td>
+                                            <td class="small" th:text="${al.ruleTriggered}">RULE</td>
+                                            <td>
+                                                <span th:if="${al.severity.name() == 'CRITICAL'}" class="badge bg-danger">CRITICAL</span>
+                                                <span th:if="${al.severity.name() == 'HIGH'}" class="badge bg-warning text-dark">HIGH</span>
+                                                <span th:if="${al.severity.name() == 'MEDIUM'}" class="badge bg-info text-dark">MEDIUM</span>
+                                                <span th:if="${al.severity.name() == 'LOW'}" class="badge bg-secondary">LOW</span>
+                                            </td>
+                                            <td>
+                                                <span th:if="${al.status.name() == 'OPEN'}" class="badge bg-danger">OPEN</span>
+                                                <span th:if="${al.status.name() == 'RESOLVED'}" class="badge bg-success">RESOLVED</span>
+                                                <span th:if="${al.status.name() == 'UNDER_REVIEW'}" class="badge bg-warning text-dark">REVIEW</span>
+                                                <span th:if="${al.status.name() == 'DISMISSED'}" class="badge bg-secondary">DISMISSED</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Transactions -->
+                    <div class="col-lg-6">
+                        <div class="card card-banking h-100">
+                            <div class="card-header-banking">
+                                <span><i class="bi bi-clock-history text-primary me-2"></i>Live Transaction Feed</span>
+                                <a th:href="@{/admin/transactions}" class="btn btn-sm btn-outline-primary">View All</a>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-banking">
+                                    <thead>
+                                        <tr>
+                                            <th>Account</th>
+                                            <th>Type</th>
+                                            <th class="text-end">Amount</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:if="${#lists.isEmpty(recentTransactions)}">
+                                            <td colspan="4" class="text-center text-muted py-4">No transactions recorded yet.</td>
+                                        </tr>
+                                        <tr th:each="tx : ${recentTransactions}">
+                                            <td class="font-monospace small" th:text="${tx.account.accountNumber}">1001XXXXXXXX</td>
+                                            <td class="small" th:text="${tx.type}">DEPOSIT</td>
+                                            <td class="text-end font-monospace fw-bold" th:text="'₹' + ${#numbers.formatDecimal(tx.amount, 1, 'COMMA', 2, 'POINT')}">₹0.00</td>
+                                            <td>
+                                                <span th:if="${tx.status.name() == 'SUCCESS'}" class="badge bg-success bg-opacity-10 text-success">SUCCESS</span>
+                                                <span th:if="${tx.status.name() == 'FAILED'}" class="badge bg-danger bg-opacity-10 text-danger">FAILED</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

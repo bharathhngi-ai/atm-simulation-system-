@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Secure Login')}">
+    <title>Secure Banking Login</title>
+</head>
+<body class="bg-light d-flex align-items-center justify-content-center min-vh-100 py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-5">
+                <!-- Branding Card -->
+                <div class="card card-banking border-0 shadow-lg">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="text-center mb-4">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-primary text-white rounded-circle mb-3 shadow" style="width: 64px; height: 64px;">
+                                <i class="bi bi-bank2 fs-2"></i>
+                            </div>
+                            <h3 class="fw-bold text-dark mb-1">Smart ATM Banking</h3>
+                            <p class="text-muted small">Enter your credentials to access your smart bank account</p>
+                        </div>
+
+                        <!-- Alerts -->
+                        <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                        <!-- Login Form -->
+                        <form th:action="@{/login}" method="post">
+                            <div class="mb-3">
+                                <label for="username" class="form-label fw-semibold small text-secondary">Username</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
+                                    <input type="text" id="username" name="username" class="form-control border-start-0" placeholder="Enter username" required autofocus>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="password" class="form-label fw-semibold small text-secondary">Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
+                                    <input type="password" id="password" name="password" class="form-control border-start-0" placeholder="••••••••" required>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold shadow-sm mb-3">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In Securely
+                            </button>
+                        </form>
+
+                        <!-- Pre-seeded Credentials Quick Guide -->
+                        <div class="bg-light p-3 rounded-3 border small mb-4">
+                            <div class="fw-bold text-secondary mb-2 d-flex align-items-center gap-1">
+                                <i class="bi bi-info-circle-fill text-primary"></i> Pre-seeded Test Accounts:
+                            </div>
+                            <div class="d-flex flex-column gap-1 text-muted" style="font-size: 0.8rem;">
+                                <div>• <strong>Customer 1:</strong> <code>john_doe</code> / <code>password123</code> (PIN: 1234)</div>
+                                <div>• <strong>Customer 2:</strong> <code>jane_smith</code> / <code>password123</code> (PIN: 1234)</div>
+                                <div>• <strong>Admin:</strong> <code>admin</code> / <code>admin123</code></div>
+                            </div>
+                        </div>
+
+                        <!-- Register Link -->
+                        <div class="text-center small text-muted">
+                            Don't have a banking account?
+                            <a th:href="@{/register}" class="fw-bold text-primary text-decoration-none ms-1">Register New Account</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center text-muted small mt-4">
+                    <i class="bi bi-shield-lock-fill text-success me-1"></i> End-to-end encrypted ATM banking simulation
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

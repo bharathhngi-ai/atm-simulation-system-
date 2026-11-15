@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<aside th:fragment="sidebar(activePage)" class="sidebar" id="appSidebar">
+    <!-- Brand -->
+    <a th:href="@{/dashboard}" class="sidebar-brand">
+        <i class="bi bi-bank2"></i>
+        <span>SMART ATM</span>
+    </a>
+
+    <!-- Menu -->
+    <div class="sidebar-menu">
+        <!-- CUSTOMER MENU -->
+        <div sec:authorize="hasRole('CUSTOMER')">
+            <div class="menu-category">Main Dashboard</div>
+            <a th:href="@{/dashboard}" th:classappend="${activePage == 'dashboard' ? 'active' : ''}">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+            <a th:href="@{/account/balance}" th:classappend="${activePage == 'balance' ? 'active' : ''}">
+                <i class="bi bi-wallet2"></i>
+                <span>Balance Inquiry</span>
+            </a>
+
+            <div class="menu-category">ATM Transactions</div>
+            <a th:href="@{/transactions/deposit}" th:classappend="${activePage == 'deposit' ? 'active' : ''}">
+                <i class="bi bi-arrow-down-circle"></i>
+                <span>Cash Deposit</span>
+            </a>
+            <a th:href="@{/transactions/withdraw}" th:classappend="${activePage == 'withdraw' ? 'active' : ''}">
+                <i class="bi bi-arrow-up-circle"></i>
+                <span>Cash Withdrawal</span>
+            </a>
+            <a th:href="@{/transactions/transfer}" th:classappend="${activePage == 'transfer' ? 'active' : ''}">
+                <i class="bi bi-arrow-left-right"></i>
+                <span>Money Transfer</span>
+            </a>
+            <a th:href="@{/transactions/history}" th:classappend="${activePage == 'history' ? 'active' : ''}">
+                <i class="bi bi-receipt"></i>
+                <span>Transaction History</span>
+            </a>
+
+            <div class="menu-category">Smart Services</div>
+            <a th:href="@{/emergency/request}" th:classappend="${activePage == 'emergency-request' ? 'active' : ''}">
+                <i class="bi bi-exclamation-octagon"></i>
+                <span>Emergency Request</span>
+            </a>
+            <a th:href="@{/emergency/received}" th:classappend="${activePage == 'emergency-received' ? 'active' : ''}">
+                <i class="bi bi-inbox"></i>
+                <span>Received Requests</span>
+            </a>
+            <a th:href="@{/contacts}" th:classappend="${activePage == 'contacts' ? 'active' : ''}">
+                <i class="bi bi-people"></i>
+                <span>Trusted Contacts</span>
+            </a>
+
+            <div class="menu-category">Account & Security</div>
+            <a th:href="@{/account/change-pin}" th:classappend="${activePage == 'change-pin' ? 'active' : ''}">
+                <i class="bi bi-key"></i>
+                <span>Change ATM PIN</span>
+            </a>
+            <a th:href="@{/security/settings}" th:classappend="${activePage == 'security' ? 'active' : ''}">
+                <i class="bi bi-shield-check"></i>
+                <span>Security & Freeze</span>
+            </a>
+            <a th:href="@{/notifications}" th:classappend="${activePage == 'notifications' ? 'active' : ''}">
+                <i class="bi bi-bell"></i>
+                <span>Notifications</span>
+            </a>
+            <a th:href="@{/profile}" th:classappend="${activePage == 'profile' ? 'active' : ''}">
+                <i class="bi bi-person"></i>
+                <span>My Profile</span>
+            </a>
+        </div>
+
+        <!-- ADMIN MENU -->
+        <div sec:authorize="hasRole('ADMIN')">
+            <div class="menu-category">Administration</div>
+            <a th:href="@{/admin/dashboard}" th:classappend="${activePage == 'admin-dashboard' ? 'active' : ''}">
+                <i class="bi bi-grid-1x2"></i>
+                <span>Admin Dashboard</span>
+            </a>
+            <a th:href="@{/admin/customers}" th:classappend="${activePage == 'admin-customers' ? 'active' : ''}">
+                <i class="bi bi-people-fill"></i>
+                <span>Customer Accounts</span>
+            </a>
+            <a th:href="@{/admin/transactions}" th:classappend="${activePage == 'admin-transactions' ? 'active' : ''}">
+                <i class="bi bi-arrow-repeat"></i>
+                <span>Transaction Logs</span>
+            </a>
+            <a th:href="@{/admin/fraud-alerts}" th:classappend="${activePage == 'admin-fraud' ? 'active' : ''}">
+                <i class="bi bi-shield-slash"></i>
+                <span>Fraud Monitoring</span>
+            </a>
+            <a th:href="@{/admin/emergency-requests}" th:classappend="${activePage == 'admin-emergency' ? 'active' : ''}">
+                <i class="bi bi-life-preserver"></i>
+                <span>Emergency Requests</span>
+            </a>
+            <a th:href="@{/admin/audit-logs}" th:classappend="${activePage == 'admin-audit' ? 'active' : ''}">
+                <i class="bi bi-journal-text"></i>
+                <span>Audit Trail</span>
+            </a>
+            <a th:href="@{/admin/statistics}" th:classappend="${activePage == 'admin-stats' ? 'active' : ''}">
+                <i class="bi bi-bar-chart"></i>
+                <span>System Statistics</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="sidebar-footer">
+        <div class="d-flex align-items-center justify-content-between">
+            <span class="badge bg-secondary">v1.0.0</span>
+            <span class="text-secondary small">MySQL 8 • Spring Boot 3</span>
+        </div>
+    </div>
+</aside>
+</html>

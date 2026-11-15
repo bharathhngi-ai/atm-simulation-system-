@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('System Emergency Requests')}">
+    <title>Emergency Requests</title>
+</head>
+<body>
+    <div class="app-wrapper">
+        <aside th:replace="~{fragments/sidebar :: sidebar('admin-emergency')}"></aside>
+
+        <main class="main-content">
+            <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+            <div class="content-body">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1"><i class="bi bi-life-preserver text-warning me-2"></i>Emergency Money Requests System</h4>
+                        <p class="text-muted small mb-0">Overview of peer-to-peer urgent assistance transactions and approval states</p>
+                    </div>
+                </div>
+
+                <div class="card card-banking">
+                    <div class="card-header-banking">
+                        <span><i class="bi bi-list-check text-warning me-2"></i>All Peer Emergency Assistance Records</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-banking">
+                            <thead>
+                                <tr>
+                                    <th>Code / Date</th>
+                                    <th>Requester</th>
+                                    <th>Requested From</th>
+                                    <th>Amount</th>
+                                    <th>Emergency Reason</th>
+                                    <th>Status</th>
+                                    <th>Decision Note / Tx Ref</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${#lists.isEmpty(requests)}">
+                                    <td colspan="7" class="text-center text-muted py-5">No emergency money requests recorded.</td>
+                                </tr>
+                                <tr th:each="r : ${requests}">
+                                    <td>
+                                        <div class="font-monospace fw-bold text-primary small" th:text="${r.requestCode}">EMG-01</div>
+                                        <div class="text-muted" style="font-size: 0.72rem;" th:text="${#temporals.format(r.createdAt, 'yyyy-MM-dd HH:mm')}">Date</div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold small text-dark" th:text="${r.requesterAccount.user.fullName}">Customer A</div>
+                                        <div class="font-monospace text-muted" style="font-size: 0.72rem;" th:text="${r.requesterAccount.accountNumber}">1001XXXXXXXX</div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold small text-dark" th:text="${r.targetAccount.user.fullName}">Customer B</div>
+                                        <div class="font-monospace text-muted" style="font-size: 0.72rem;" th:text="${r.targetAccount.accountNumber}">1001XXXXXXXX</div>
+                                    </td>
+                                    <td class="fw-bold font-monospace text-dark" th:text="'₹' + ${#numbers.formatDecimal(r.amount, 1, 'COMMA', 2, 'POINT')}">₹0.00</td>
+                                    <td class="small" th:text="${r.reason}">Reason</td>
+                                    <td>
+                                        <span th:if="${r.status.name() == 'PENDING'}" class="badge bg-warning text-dark">PENDING</span>
+                                        <span th:if="${r.status.name() == 'APPROVED'}" class="badge bg-success">APPROVED</span>
+                                        <span th:if="${r.status.name() == 'REJECTED'}" class="badge bg-danger">DECLINED</span>
+                                        <span th:if="${r.status.name() == 'EXPIRED'}" class="badge bg-secondary">EXPIRED</span>
+                                    </td>
+                                    <td class="small text-muted">
+                                        <div th:if="${r.decisionNote}" th:text="${r.decisionNote}">Note</div>
+                                        <div th:if="${r.transactionReference}" class="font-monospace text-primary" style="font-size: 0.72rem;" th:text="'Tx: ' + ${r.transactionReference}">Tx</div>
+                                        <div th:unless="${r.decisionNote}">-</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3" th:if="${totalPages > 1}">
+                        <div class="text-muted small">
+                            Page <strong th:text="${currentPage + 1}">1</strong> of <strong th:text="${totalPages}">1</strong>
+                        </div>
+                        <ul class="pagination pagination-sm m-0">
+                            <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                                <a class="page-link" th:href="@{/admin/emergency-requests(page=${currentPage - 1})}">Previous</a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage ? 'active' : ''}">
+                                <a class="page-link" th:href="@{/admin/emergency-requests(page=${i})}" th:text="${i + 1}">1</a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages ? 'disabled' : ''}">
+                                <a class="page-link" th:href="@{/admin/emergency-requests(page=${currentPage + 1})}">Next</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

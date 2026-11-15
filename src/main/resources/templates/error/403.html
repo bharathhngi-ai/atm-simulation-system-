@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Access Denied (403)')}">
+    <title>Access Denied (403)</title>
+</head>
+<body class="bg-light d-flex align-items-center justify-content-center min-vh-100 py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-5 text-center">
+                <div class="card card-banking p-4 p-md-5 border-0 shadow-lg">
+                    <div class="rounded-circle bg-warning bg-opacity-10 text-warning d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 72px; height: 72px;">
+                        <i class="bi bi-shield-lock-fill fs-1"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-1">403 - Access Denied</h3>
+                    <p class="text-secondary small mb-4">
+                        You do not have the required administrative role or permissions to view this secure banking resource.
+                    </p>
+
+                    <div class="d-flex justify-content-center gap-2">
+                        <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm px-3">
+                            <i class="bi bi-arrow-left me-1"></i> Return Back
+                        </a>
+                        <a th:href="@{/dashboard}" class="btn btn-primary btn-sm px-3">
+                            <i class="bi bi-house-door me-1"></i> Return to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

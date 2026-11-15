@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Incoming Emergency Money Requests')}">
+    <title>Received Requests</title>
+</head>
+<body>
+    <div class="app-wrapper">
+        <aside th:replace="~{fragments/sidebar :: sidebar('emergency-received')}"></aside>
+
+        <main class="main-content">
+            <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+            <div class="content-body">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1"><i class="bi bi-inbox text-primary me-2"></i>Received Emergency Requests</h4>
+                        <p class="text-muted small mb-0">Review, approve, or decline emergency assistance requests from contacts</p>
+                    </div>
+                    <div>
+                        <a th:href="@{/emergency/request}" class="btn btn-outline-warning btn-sm text-dark">
+                            <i class="bi bi-send me-1"></i> Send Emergency Request
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card card-banking mb-4">
+                    <div class="card-header-banking">
+                        <span><i class="bi bi-exclamation-circle text-warning me-2"></i>Incoming Requests Awaiting Action</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-banking">
+                            <thead>
+                                <tr>
+                                    <th>Code / Date</th>
+                                    <th>Requester</th>
+                                    <th>Account #</th>
+                                    <th>Requested Amount</th>
+                                    <th>Reason / Circumstances</th>
+                                    <th>Status</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${#lists.isEmpty(receivedRequests)}">
+                                    <td colspan="7" class="text-center text-muted py-5">
+                                        <i class="bi bi-check2-all fs-2 d-block mb-1 text-success"></i>
+                                        You have no pending emergency requests at this time.
+                                    </td>
+                                </tr>
+                                <tr th:each="req : ${receivedRequests}">
+                                    <td>
+                                        <div class="font-monospace fw-bold text-primary small" th:text="${req.requestCode}">EMG-01</div>
+                                        <div class="text-muted" style="font-size: 0.72rem;" th:text="${#temporals.format(req.createdAt, 'yyyy-MM-dd HH:mm')}">2026-11-12</div>
+                                    </td>
+                                    <td>
+                                        <strong th:text="${req.requesterAccount.user.fullName}">Sender Name</strong>
+                                        <div class="text-muted small" th:text="${req.requesterAccount.user.email}">user@example.com</div>
+                                    </td>
+                                    <td class="font-monospace small" th:text="${req.requesterAccount.accountNumber}">1001XXXXXXXX</td>
+                                    <td class="fw-bold fs-5 text-dark font-monospace" th:text="'₹' + ${#numbers.formatDecimal(req.amount, 1, 'COMMA', 2, 'POINT')}">₹0.00</td>
+                                    <td class="small" th:text="${req.reason}">Urgent reason</td>
+                                    <td>
+                                        <span th:if="${req.status.name() == 'PENDING'}" class="badge bg-warning text-dark">PENDING REVIEW</span>
+                                        <span th:if="${req.status.name() == 'APPROVED'}" class="badge bg-success">APPROVED</span>
+                                        <span th:if="${req.status.name() == 'REJECTED'}" class="badge bg-danger">DECLINED</span>
+                                        <span th:if="${req.status.name() == 'EXPIRED'}" class="badge bg-secondary">EXPIRED</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div th:if="${req.status.name() == 'PENDING'}" class="d-flex justify-content-center gap-2">
+                                            <!-- Approve Trigger Modal -->
+                                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" th:data-bs-target="'#approveModal' + ${req.id}">
+                                                <i class="bi bi-check-lg me-1"></i>Approve
+                                            </button>
+
+                                            <!-- Reject Trigger Modal -->
+                                            <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" th:data-bs-target="'#rejectModal' + ${req.id}">
+                                                <i class="bi bi-x-lg me-1"></i>Decline
+                                            </button>
+                                        </div>
+                                        <div th:unless="${req.status.name() == 'PENDING'}" class="text-muted small">
+                                            <span th:text="${req.decisionNote != null ? req.decisionNote : 'Processed'}">Completed</span>
+                                        </div>
+
+                                        <!-- APPROVE MODAL -->
+                                        <div class="modal fade" th:id="'approveModal' + ${req.id}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content text-start">
+                                                    <form th:action="@{'/emergency/received/' + ${req.id} + '/approve'}" method="post">
+                                                        <div class="modal-header bg-success text-white">
+                                                            <h5 class="modal-title fs-6"><i class="bi bi-check-circle me-2"></i>Authorize Emergency Transfer</h5>
+                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body p-4">
+                                                            <div class="text-center mb-3">
+                                                                <div class="text-muted small">You are approving emergency assistance to:</div>
+                                                                <h5 class="fw-bold text-dark mt-1" th:text="${req.requesterAccount.user.fullName}">Requester</h5>
+                                                                <div class="display-6 fw-bold text-success font-monospace my-2" th:text="'₹' + ${#numbers.formatDecimal(req.amount, 1, 'COMMA', 2, 'POINT')}">₹0.00</div>
+                                                                <div class="badge bg-light text-secondary border font-monospace" th:text="'To Account: ' + ${req.requesterAccount.accountNumber}">Account #</div>
+                                                            </div>
+
+                                                            <div class="mb-3">
+                                                                <label class="form-label fw-semibold small text-secondary">Optional Note to Requester</label>
+                                                                <input type="text" name="note" class="form-control" placeholder="e.g. Glad to help! Get well soon.">
+                                                            </div>
+
+                                                            <div class="mb-3 text-center">
+                                                                <label class="form-label fw-semibold small text-danger">Enter 4-Digit ATM PIN to Authorize *</label>
+                                                                <input type="password" name="atmPin" class="form-control font-monospace fs-4 text-center mx-auto" style="max-width: 180px;" placeholder="••••" maxlength="4" pattern="[0-9]{4}" required autocomplete="off">
+                                                            </div>
+
+                                                            <div class="alert alert-light border small text-muted mb-0">
+                                                                <i class="bi bi-shield-lock text-primary me-1"></i> Funds will be transferred immediately upon verification of your PIN and available balance.
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                                            <button type="submit" class="btn btn-success btn-sm">Confirm &amp; Transfer Funds</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- REJECT MODAL -->
+                                        <div class="modal fade" th:id="'rejectModal' + ${req.id}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content text-start">
+                                                    <form th:action="@{'/emergency/received/' + ${req.id} + '/reject'}" method="post">
+                                                        <div class="modal-header bg-danger text-white">
+                                                            <h5 class="modal-title fs-6"><i class="bi bi-x-circle me-2"></i>Decline Emergency Request</h5>
+                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body p-4">
+                                                            <p class="small text-muted mb-3">Are you sure you want to decline this emergency request of <strong class="text-dark" th:text="'₹' + ${#numbers.formatDecimal(req.amount, 1, 'COMMA', 2, 'POINT')}">₹0.00</strong>?</p>
+                                                            <div class="mb-3">
+                                                                <label class="form-label fw-semibold small text-secondary">Reason for Declining (Optional)</label>
+                                                                <input type="text" name="reason" class="form-control" placeholder="e.g. Insufficient surplus funds at this time.">
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                                            <button type="submit" class="btn btn-danger btn-sm">Decline Request</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

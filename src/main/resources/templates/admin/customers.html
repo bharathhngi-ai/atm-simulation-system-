@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Customer Accounts Management')}">
+    <title>Customer Management</title>
+</head>
+<body>
+    <div class="app-wrapper">
+        <aside th:replace="~{fragments/sidebar :: sidebar('admin-customers')}"></aside>
+
+        <main class="main-content">
+            <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+            <div class="content-body">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1"><i class="bi bi-people text-primary me-2"></i>Customer Accounts Management</h4>
+                        <p class="text-muted small mb-0">View all customer bank accounts, balances, and manage administrative lock states</p>
+                    </div>
+                </div>
+
+                <div class="card card-banking">
+                    <div class="card-header-banking">
+                        <span><i class="bi bi-person-lines-fill text-primary me-2"></i>All Registered Bank Accounts (<span th:text="${totalElements}">0</span>)</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-banking">
+                            <thead>
+                                <tr>
+                                    <th>Account #</th>
+                                    <th>Customer Name</th>
+                                    <th>Contact Info</th>
+                                    <th>Type</th>
+                                    <th class="text-end">Balance</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th class="text-center">Admin Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${#lists.isEmpty(accounts)}">
+                                    <td colspan="8" class="text-center text-muted py-5">No customer accounts registered yet.</td>
+                                </tr>
+                                <tr th:each="acc : ${accounts}">
+                                    <td class="font-monospace fw-bold small text-primary" th:text="${acc.accountNumber}">1001XXXXXXXX</td>
+                                    <td>
+                                        <div class="fw-bold text-dark" th:text="${acc.user.fullName}">Customer Name</div>
+                                        <div class="badge bg-light text-secondary border font-monospace" style="font-size: 0.72rem;" th:text="'@' + ${acc.user.username}">@username</div>
+                                    </td>
+                                    <td class="small">
+                                        <div th:text="${acc.user.email}">user@bank.com</div>
+                                        <div class="text-muted" th:text="${acc.user.phoneNumber}">+1 555-0199</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border" th:text="${acc.accountType}">SAVINGS</span>
+                                    </td>
+                                    <td class="text-end fw-bold font-monospace" th:text="'₹' + ${#numbers.formatDecimal(acc.balance, 1, 'COMMA', 2, 'POINT')}">₹0.00</td>
+                                    <td>
+                                        <span th:if="${acc.active}" class="badge badge-status badge-active">ACTIVE</span>
+                                        <span th:if="${acc.frozen}" class="badge badge-status badge-frozen"><i class="bi bi-snow2 me-1"></i>FROZEN</span>
+                                    </td>
+                                    <td class="small text-muted" th:text="${#temporals.format(acc.createdAt, 'yyyy-MM-dd')}">2026-11-12</td>
+                                    <td class="text-center">
+                                        <!-- Toggle Freeze Form -->
+                                        <form th:action="@{'/admin/accounts/' + ${acc.accountNumber} + '/toggle-freeze'}" method="post" class="m-0 d-inline"
+                                              th:onsubmit="'return confirm(\'Are you sure you want to ' + (${acc.active} ? 'FREEZE' : 'UNFREEZE') + ' account ' + ${acc.accountNumber} + '?\');'">
+                                            <input type="hidden" name="reason" th:value="${acc.active ? 'Administrative safety freeze' : 'Administrative clearance'}">
+                                            <button type="submit" class="btn btn-sm"
+                                                    th:classappend="${acc.active ? 'btn-outline-danger' : 'btn-outline-success'}"
+                                                    th:title="${acc.active ? 'Freeze Account' : 'Unfreeze Account'}">
+                                                <i class="bi" th:classappend="${acc.active ? 'bi-snow2' : 'bi-unlock-fill'}"></i>
+                                                <span th:text="${acc.active ? 'Freeze' : 'Unfreeze'}">Toggle</span>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3" th:if="${totalPages > 1}">
+                        <div class="text-muted small">
+                            Page <strong th:text="${currentPage + 1}">1</strong> of <strong th:text="${totalPages}">1</strong>
+                        </div>
+                        <ul class="pagination pagination-sm m-0">
+                            <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                                <a class="page-link" th:href="@{/admin/customers(page=${currentPage - 1})}">Previous</a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage ? 'active' : ''}">
+                                <a class="page-link" th:href="@{/admin/customers(page=${i})}" th:text="${i + 1}">1</a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages ? 'disabled' : ''}">
+                                <a class="page-link" th:href="@{/admin/customers(page=${currentPage + 1})}">Next</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

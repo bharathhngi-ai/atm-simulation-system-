@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Customer Profile')}">
+    <title>Customer Profile</title>
+</head>
+<body>
+    <div class="app-wrapper">
+        <aside th:replace="~{fragments/sidebar :: sidebar('profile')}"></aside>
+
+        <main class="main-content">
+            <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+            <div class="content-body">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <div class="mb-4">
+                    <h4 class="fw-bold text-dark mb-1"><i class="bi bi-person-gear text-primary me-2"></i>Customer Profile &amp; Settings</h4>
+                    <p class="text-muted small mb-0">View your bank account overview and update contact information</p>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Profile Card Info -->
+                    <div class="col-lg-4">
+                        <div class="card card-banking text-center p-4">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3 shadow" style="width: 72px; height: 72px;">
+                                <i class="bi bi-person-fill fs-1"></i>
+                            </div>
+                            <h5 class="fw-bold text-dark mb-1" th:text="${user.fullName}">Customer Name</h5>
+                            <div class="badge bg-light text-secondary border font-monospace mb-3" th:text="'@' + ${user.username}">@username</div>
+
+                            <hr class="my-3">
+
+                            <div class="text-start small">
+                                <div class="d-flex justify-content-between py-1">
+                                    <span class="text-muted">Account Number:</span>
+                                    <strong class="font-monospace text-primary" th:text="${account.accountNumber}">1001XXXXXXXX</strong>
+                                </div>
+                                <div class="d-flex justify-content-between py-1">
+                                    <span class="text-muted">Account Type:</span>
+                                    <span class="badge bg-light text-dark border" th:text="${account.accountType}">SAVINGS</span>
+                                </div>
+                                <div class="d-flex justify-content-between py-1">
+                                    <span class="text-muted">Status:</span>
+                                    <span th:if="${account.active}" class="badge badge-status badge-active">ACTIVE</span>
+                                    <span th:if="${account.frozen}" class="badge badge-status badge-frozen">FROZEN</span>
+                                </div>
+                                <div class="d-flex justify-content-between py-1">
+                                    <span class="text-muted">Member Since:</span>
+                                    <span th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd')}">2026-11-12</span>
+                                </div>
+                            </div>
+
+                            <hr class="my-3">
+
+                            <div class="d-grid gap-2">
+                                <a th:href="@{/account/change-pin}" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-key me-1"></i>Change ATM PIN
+                                </a>
+                                <a th:href="@{/security/settings}" class="btn btn-outline-danger btn-sm">
+                                    <i class="bi bi-shield-lock me-1"></i>Security Settings
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Update Profile Form -->
+                    <div class="col-lg-8">
+                        <div class="card card-banking">
+                            <div class="card-header-banking">
+                                <span><i class="bi bi-pencil-square text-primary me-2"></i>Update Personal Details</span>
+                            </div>
+                            <div class="card-body p-4">
+                                <form th:action="@{/profile/update}" th:object="${profileDto}" method="post">
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold text-secondary">Full Legal Name *</label>
+                                            <input type="text" th:field="*{fullName}" class="form-control" required>
+                                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold text-secondary">Email Address *</label>
+                                            <input type="email" th:field="*{email}" class="form-control" required>
+                                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold text-secondary">Phone Number *</label>
+                                            <input type="text" th:field="*{phoneNumber}" class="form-control" required>
+                                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold text-secondary">Username (Fixed)</label>
+                                            <input type="text" class="form-control bg-light" th:value="${user.username}" readonly>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="form-label small fw-semibold text-secondary">Residential Address *</label>
+                                        <input type="text" th:field="*{address}" class="form-control" required>
+                                        <div class="text-danger small mt-1" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-end">
+                                        <button type="submit" class="btn btn-primary px-4">
+                                            <i class="bi bi-save me-1"></i> Save Profile Changes
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

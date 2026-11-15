@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('System Statistics & Metrics')}">
+    <title>System Statistics</title>
+</head>
+<body>
+    <div class="app-wrapper">
+        <aside th:replace="~{fragments/sidebar :: sidebar('admin-stats')}"></aside>
+
+        <main class="main-content">
+            <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+            <div class="content-body">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1"><i class="bi bi-bar-chart text-primary me-2"></i>Platform Operational Statistics</h4>
+                        <p class="text-muted small mb-0">High-level banking throughput, aggregate vault balances, and security ratios</p>
+                    </div>
+                    <div>
+                        <button onclick="window.print()" class="btn btn-outline-dark btn-sm">
+                            <i class="bi bi-printer me-1"></i> Print Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Vault Liquidity Section -->
+                <div class="card card-banking mb-4">
+                    <div class="card-header-banking">
+                        <span><i class="bi bi-bank text-primary me-2"></i>Total Vault Liquidity &amp; Deposit Ratios</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-4 text-center">
+                            <div class="col-md-3 border-end">
+                                <div class="text-muted small text-uppercase fw-semibold">Total Bank Balance Held</div>
+                                <h3 class="fw-bold text-primary my-2 font-monospace" th:text="'₹' + ${#numbers.formatDecimal(stats.totalBankBalance, 1, 'COMMA', 2, 'POINT')}">₹0.00</h3>
+                                <div class="text-success small"><i class="bi bi-check-circle me-1"></i>100% Fully Backed</div>
+                            </div>
+                            <div class="col-md-3 border-end">
+                                <div class="text-muted small text-uppercase fw-semibold">Total Deposits Inflow</div>
+                                <h3 class="fw-bold text-success my-2 font-monospace" th:text="'₹' + ${#numbers.formatDecimal(stats.totalDeposits, 1, 'COMMA', 2, 'POINT')}">₹0.00</h3>
+                                <div class="text-muted small">ATM Cash + Opening Deposits</div>
+                            </div>
+                            <div class="col-md-3 border-end">
+                                <div class="text-muted small text-uppercase fw-semibold">Total Cash Dispensed</div>
+                                <h3 class="fw-bold text-danger my-2 font-monospace" th:text="'₹' + ${#numbers.formatDecimal(stats.totalWithdrawals, 1, 'COMMA', 2, 'POINT')}">₹0.00</h3>
+                                <div class="text-muted small">ATM Terminal Dispenses</div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-muted small text-uppercase fw-semibold">Inter-Account Transfers</div>
+                                <h3 class="fw-bold text-info my-2 font-monospace" th:text="'₹' + ${#numbers.formatDecimal(stats.totalTransfers, 1, 'COMMA', 2, 'POINT')}">₹0.00</h3>
+                                <div class="text-muted small">Peer &amp; Emergency Volume</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Operational Breakdowns -->
+                <div class="row g-4">
+                    <!-- Customer Account Ratios -->
+                    <div class="col-lg-6">
+                        <div class="card card-banking h-100">
+                            <div class="card-header-banking">
+                                <span><i class="bi bi-people text-primary me-2"></i>Accounts &amp; Customer Portfolio</span>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span class="text-muted">Total Registered Customers:</span>
+                                    <strong class="font-monospace fs-5 text-dark" th:text="${stats.totalUsers}">0</strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span class="text-muted">Total Active Bank Accounts:</span>
+                                    <strong class="font-monospace fs-5 text-success" th:text="${stats.activeAccounts}">0</strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span class="text-muted">Frozen Accounts (Under Lock):</span>
+                                    <strong class="font-monospace fs-5 text-danger" th:text="${stats.frozenAccounts}">0</strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2">
+                                    <span class="text-muted">Platform Security Lock Ratio:</span>
+                                    <span class="badge bg-light text-secondary border font-monospace">
+                                        <span th:text="${stats.totalAccounts > 0 ? #numbers.formatDecimal(((stats.frozenAccounts * 1.0) / stats.totalAccounts) * 100, 1, 1) + '%' : '0.0%'}">0%</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Operations & Fraud Ratios -->
+                    <div class="col-lg-6">
+                        <div class="card card-banking h-100">
+                            <div class="card-header-banking">
+                                <span><i class="bi bi-shield-check text-primary me-2"></i>Transaction Integrity &amp; Security</span>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span class="text-muted">Total Processed Transactions:</span>
+                                    <strong class="font-monospace fs-5 text-dark" th:text="${stats.totalTransactions}">0</strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span class="text-muted">Successful Completions:</span>
+                                    <strong class="font-monospace fs-5 text-success" th:text="${stats.successfulTx}">0</strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span class="text-muted">Failed / Blocked Operations:</span>
+                                    <strong class="font-monospace fs-5 text-danger" th:text="${stats.failedTx}">0</strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2">
+                                    <span class="text-muted">Open Fraud Incidents Requiring Review:</span>
+                                    <span class="badge bg-danger fs-6 font-monospace" th:text="${stats.openFraudAlerts}">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

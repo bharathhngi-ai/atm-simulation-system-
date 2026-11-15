@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Account Security Alerts')}">
+    <title>Fraud Alerts</title>
+</head>
+<body>
+    <div class="app-wrapper">
+        <aside th:replace="~{fragments/sidebar :: sidebar('security')}"></aside>
+
+        <main class="main-content">
+            <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+            <div class="content-body">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1"><i class="bi bi-shield-exclamation text-danger me-2"></i>Security &amp; Fraud Alerts</h4>
+                        <p class="text-muted small mb-0">Automated rule-based security triggers recorded for your account</p>
+                    </div>
+                    <div>
+                        <a th:href="@{/security/settings}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-gear me-1"></i> Security Center
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card card-banking">
+                    <div class="card-header-banking">
+                        <span><i class="bi bi-shield-slash text-danger me-2"></i>Detected Alert Logs</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-banking">
+                            <thead>
+                                <tr>
+                                    <th>Code / Date</th>
+                                    <th>Triggered Rule</th>
+                                    <th>Description</th>
+                                    <th>Severity</th>
+                                    <th>Status</th>
+                                    <th>Resolution</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${#lists.isEmpty(alerts)}">
+                                    <td colspan="6" class="text-center text-muted py-5">
+                                        <i class="bi bi-shield-check fs-2 text-success d-block mb-1"></i>
+                                        No security alerts recorded. Your account is operating securely.
+                                    </td>
+                                </tr>
+                                <tr th:each="al : ${alerts}">
+                                    <td>
+                                        <div class="font-monospace fw-bold text-primary small" th:text="${al.alertCode}">FRD-01</div>
+                                        <div class="text-muted" style="font-size: 0.72rem;" th:text="${#temporals.format(al.createdAt, 'yyyy-MM-dd HH:mm')}">Date</div>
+                                    </td>
+                                    <td class="font-monospace small fw-semibold" th:text="${al.ruleTriggered}">RULE</td>
+                                    <td class="small" th:text="${al.description}">Description</td>
+                                    <td>
+                                        <span th:if="${al.severity.name() == 'LOW'}" class="badge bg-secondary">LOW</span>
+                                        <span th:if="${al.severity.name() == 'MEDIUM'}" class="badge bg-info text-dark">MEDIUM</span>
+                                        <span th:if="${al.severity.name() == 'HIGH'}" class="badge bg-warning text-dark">HIGH</span>
+                                        <span th:if="${al.severity.name() == 'CRITICAL'}" class="badge bg-danger">CRITICAL</span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${al.status.name() == 'OPEN'}" class="badge bg-danger">OPEN</span>
+                                        <span th:if="${al.status.name() == 'UNDER_REVIEW'}" class="badge bg-warning text-dark">IN REVIEW</span>
+                                        <span th:if="${al.status.name() == 'RESOLVED'}" class="badge bg-success">RESOLVED</span>
+                                        <span th:if="${al.status.name() == 'DISMISSED'}" class="badge bg-secondary">DISMISSED</span>
+                                    </td>
+                                    <td class="small text-muted" th:text="${al.resolutionNotes != null ? al.resolutionNotes : 'Under automated monitoring'}">Notes</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>
